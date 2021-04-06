@@ -26,7 +26,7 @@
          FlutterApplication and put your custom class here. -->
    <application
         android:label="local_people_client"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/app_icon">
         <activity
             android:name=".MainActivity"
             android:launchMode="singleTop"
