@@ -26,6 +26,7 @@
          FlutterApplication and put your custom class here. -->
    <application
         android:label="local_people_client"
+        android:requestLegacyExternalStorage="true"
         android:icon="@mipmap/app_icon">
         <activity
             android:name=".MainActivity"
