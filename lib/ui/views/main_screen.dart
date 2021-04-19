@@ -4,9 +4,11 @@ import 'package:flutter_icons/flutter_icons.dart';
 import 'package:local_people_core/core.dart';
 import 'home_client.dart';
 import 'more_screen.dart';
-import 'job_screen.dart';
-import 'message_screen.dart';
+//import 'job_screen.dart';
+//import 'message_screen.dart';
 import 'search_screen.dart';
+import 'package:local_people_core/messages.dart';
+import 'package:local_people_core/jobs.dart';
 
 class MainScreen extends StatefulWidget {
   static Route route() {
@@ -34,7 +36,7 @@ class _MainScreenState extends State<MainScreen> {
             ClientHomeScreen(),
             JobScreen(),
             SearchScreen(),
-            MessageScreen(),
+            MessageBoxScreen(),
             MoreScreen(),
           ],
         ),

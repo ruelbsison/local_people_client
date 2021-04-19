@@ -3,6 +3,7 @@ import 'package:local_people_core/core.dart';
 import '../widgets/provider_card.dart';
 import '../widgets/package_card.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
+import 'package:local_people_core/jobs.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   @override
@@ -16,9 +17,11 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
         appBar: AppBarWidget(
+          appBarPreferredSize: Size.fromHeight(60.0),
           title: Text(
             AppLocalizations.of(context).appTitle,
           ),
+          subTitle: DateFormatUtil.getFormattedDate(),
           appBar: AppBar(),
           actions: <Widget>[
             Container(
@@ -31,7 +34,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                     fontWeight: FontWeight.normal,
                   ),
                 ),
-                onPressed: ()  {},
+                onPressed: ()  {
+                  AppRouter.pushPage(context, JobCreateScreen());
+                },
               ),
               alignment: Alignment.center,
             )
@@ -59,22 +64,22 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return Stack (
         children: <Widget>[
           SingleChildScrollView (
-            child: ResponsiveWrapper (
-              // defaultScale: true,
-              maxWidth: 1200,
-              minWidth: 375,
-              defaultName: MOBILE,
-              breakpoints: [
-                /* ResponsiveBreakpoint.resize(375, name: MOBILE),
-                ResponsiveBreakpoint.autoScale(800, name: TABLET),
-                ResponsiveBreakpoint.autoScale(1000, name: TABLET),
-                ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-                ResponsiveBreakpoint.autoScale(2460, name: "4K"),*/
-                ResponsiveBreakpoint.autoScale(375, name: MOBILE),
-                ResponsiveBreakpoint.resize(600, name: MOBILE),
-                ResponsiveBreakpoint.resize(850, name: TABLET),
-                ResponsiveBreakpoint.resize(1080, name: DESKTOP),
-              ],
+            // child: ResponsiveWrapper (
+            //   // defaultScale: true,
+            //   maxWidth: 1200,
+            //   minWidth: 375,
+            //   defaultName: MOBILE,
+            //   breakpoints: [
+            //     /* ResponsiveBreakpoint.resize(375, name: MOBILE),
+            //     ResponsiveBreakpoint.autoScale(800, name: TABLET),
+            //     ResponsiveBreakpoint.autoScale(1000, name: TABLET),
+            //     ResponsiveBreakpoint.resize(1200, name: DESKTOP),
+            //     ResponsiveBreakpoint.autoScale(2460, name: "4K"),*/
+            //     ResponsiveBreakpoint.autoScale(375, name: MOBILE),
+            //     ResponsiveBreakpoint.resize(600, name: MOBILE),
+            //     ResponsiveBreakpoint.resize(850, name: TABLET),
+            //     ResponsiveBreakpoint.resize(1080, name: DESKTOP),
+            //   ],
               // padding: EdgeInsets.all(20),
               child: Column (
                 children: <Widget> [
@@ -150,7 +155,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                   _buildMostRecommendedSection(),
                 ],
               ),
-            ),
+            //),
           ),
         ]
     );
