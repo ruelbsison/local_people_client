@@ -18,8 +18,8 @@ class ClientApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: AppLocalizations().clientAppTitle,
-      theme: themeData(AppThemeConfig.clientTheme),
-      darkTheme: themeData(AppThemeConfig.lightTheme),
+      theme: themeData(Theme.of(context), AppThemeConfig.clientTheme),
+      darkTheme: themeData(Theme.of(context), AppThemeConfig.lightTheme),
       localizationsDelegates: [
         LocalPeopleLocalizationsDelegate(),
         AppLocalizationsDelegate(),
@@ -76,11 +76,18 @@ class ClientApp extends StatelessWidget {
   }
 
   // Apply font to our app's theme
-  ThemeData themeData(ThemeData theme) {
-    return theme.copyWith(
-      textTheme: GoogleFonts.interTextTheme(
-        theme.textTheme,
-      ),
+  ThemeData themeData(ThemeData baseTheme, ThemeData theme) {
+    return baseTheme.copyWith(
+      backgroundColor: theme.backgroundColor,
+      primaryColor: theme.primaryColor,
+      accentColor: theme.accentColor,
+      cursorColor: theme.cursorColor,
+      scaffoldBackgroundColor: theme.scaffoldBackgroundColor,
+      appBarTheme: theme.appBarTheme,
+      textTheme: theme.textTheme,
+      elevatedButtonTheme: theme.elevatedButtonTheme,
+      textButtonTheme: theme.textButtonTheme,
+      outlinedButtonTheme: theme.outlinedButtonTheme,
     );
   }
 
