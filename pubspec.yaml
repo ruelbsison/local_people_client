@@ -31,7 +31,7 @@ dependencies:
   google_fonts: ^1.1.2
   # responsive_builder:
   # device_preview: ^0.5.5
-  uuid: any # ^3.0.1
+  # uuid: any # ^3.0.1
   responsive_framework: 0.0.15
 
   # Local people modules

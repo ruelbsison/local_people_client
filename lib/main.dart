@@ -14,7 +14,7 @@ void main() async {
       appType: AppType.CLIENT,
       debugTag: true,
       flavorName: "dev",
-      child: ClientApp.runWidget(),
+      child: ClientApp.runWidget(AppType.CLIENT,),
     ),
   );
 }

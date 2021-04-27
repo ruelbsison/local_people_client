@@ -4,6 +4,7 @@ import '../widgets/provider_card.dart';
 import '../widgets/package_card.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:local_people_core/jobs.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   @override
@@ -11,8 +12,26 @@ class ClientHomeScreen extends StatefulWidget {
 }
 
 class _ClientHomeScreenState extends State<ClientHomeScreen> {
+
+  void printScreenInformation() {
+    print('Device width dp:${1.sw}dp');
+    print('Device height dp:${1.sh}dp');
+    print('Device pixel density:${ScreenUtil().pixelRatio}');
+    print('Bottom safe zone distance dp:${ScreenUtil().bottomBarHeight}dp');
+    print('Status bar height dp:${ScreenUtil().statusBarHeight}dp');
+    print('The ratio of actual width to UI design:${ScreenUtil().scaleWidth}');
+    print(
+        'The ratio of actual height to UI design:${ScreenUtil().scaleHeight}');
+    print('System font scaling:${ScreenUtil().textScaleFactor}');
+    print('0.5 times the screen width:${0.5.sw}dp');
+    print('0.5 times the screen height:${0.5.sh}dp');
+    print('Screen orientation:${ScreenUtil().orientation}');
+  }
+
   @override
   Widget build(BuildContext context) {
+    //printScreenInformation();
+
     // Figma Flutter Generator DashboardWidget - FRAME
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
