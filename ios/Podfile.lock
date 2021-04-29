@@ -4,11 +4,6 @@ PODS:
     - AppAuth/ExternalUserAgent (= 1.3.1)
   - AppAuth/Core (1.3.1)
   - AppAuth/ExternalUserAgent (1.3.1)
-  - BSGridCollectionViewLayout (1.2.5)
-  - BSImagePicker (2.10.3):
-    - BSGridCollectionViewLayout (= 1.2.5)
-    - BSImageView (= 1.0.3)
-  - BSImageView (1.0.3)
   - Flutter (1.0.0)
   - flutter_appauth (0.0.1):
     - AppAuth (= 1.3.1)
@@ -18,30 +13,39 @@ PODS:
   - FMDB (2.7.5):
     - FMDB/standard (= 2.7.5)
   - FMDB/standard (2.7.5)
-  - multi_image_picker (4.8.00):
-    - BSImagePicker (~> 2.10.3)
+  - google_maps_flutter (0.0.1):
+    - Flutter
+    - GoogleMaps (< 3.10)
+  - GoogleMaps (3.9.0):
+    - GoogleMaps/Maps (= 3.9.0)
+  - GoogleMaps/Base (3.9.0)
+  - GoogleMaps/Maps (3.9.0):
+    - GoogleMaps/Base
+  - image_picker (0.0.1):
     - Flutter
   - path_provider (0.0.1):
     - Flutter
   - sqflite (0.0.2):
     - Flutter
     - FMDB (>= 2.7.5)
+  - webview_flutter (0.0.1):
+    - Flutter
 
 DEPENDENCIES:
   - Flutter (from `Flutter`)
   - flutter_appauth (from `.symlinks/plugins/flutter_appauth/ios`)
   - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
-  - multi_image_picker (from `.symlinks/plugins/multi_image_picker/ios`)
+  - google_maps_flutter (from `.symlinks/plugins/google_maps_flutter/ios`)
+  - image_picker (from `.symlinks/plugins/image_picker/ios`)
   - path_provider (from `.symlinks/plugins/path_provider/ios`)
   - sqflite (from `.symlinks/plugins/sqflite/ios`)
+  - webview_flutter (from `.symlinks/plugins/webview_flutter/ios`)
 
 SPEC REPOS:
   trunk:
     - AppAuth
-    - BSGridCollectionViewLayout
-    - BSImagePicker
-    - BSImageView
     - FMDB
+    - GoogleMaps
 
 EXTERNAL SOURCES:
   Flutter:
@@ -50,25 +54,29 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/flutter_appauth/ios"
   flutter_secure_storage:
     :path: ".symlinks/plugins/flutter_secure_storage/ios"
-  multi_image_picker:
-    :path: ".symlinks/plugins/multi_image_picker/ios"
+  google_maps_flutter:
+    :path: ".symlinks/plugins/google_maps_flutter/ios"
+  image_picker:
+    :path: ".symlinks/plugins/image_picker/ios"
   path_provider:
     :path: ".symlinks/plugins/path_provider/ios"
   sqflite:
     :path: ".symlinks/plugins/sqflite/ios"
+  webview_flutter:
+    :path: ".symlinks/plugins/webview_flutter/ios"
 
 SPEC CHECKSUMS:
   AppAuth: 8803ba1aec6d00d9afd30093f82e600307eaa6ea
-  BSGridCollectionViewLayout: 333dcb457a5a3bdd9212607ab5756553dcfe06cb
-  BSImagePicker: 07404254f2fcdaf5a2eb403c0f8c337267ce8738
-  BSImageView: a149459433a2687157d034c78e059d30ac7f2544
   Flutter: 434fef37c0980e73bb6479ef766c45957d4b510c
   flutter_appauth: a6bf9fa3192a14a981475c4cbe3bcebd3b563144
   flutter_secure_storage: 7953c38a04c3fdbb00571bcd87d8e3b5ceb9daec
   FMDB: 2ce00b547f966261cd18927a3ddb07cb6f3db82a
-  multi_image_picker: 6dfd22d7e6441a1cb06f6876fe8cc5f32f7f6610
+  google_maps_flutter: c7f9c73576de1fbe152a227bfd6e6c4ae8088619
+  GoogleMaps: 4b5346bddfe6911bb89155d43c903020170523ac
+  image_picker: 9c3312491f862b28d21ecd8fdf0ee14e601b3f09
   path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
   sqflite: 6d358c025f5b867b29ed92fc697fd34924e11904
+  webview_flutter: 9f491a9b5a66f2573946a389b2677987b0ff8c0b
 
 PODFILE CHECKSUM: aafe91acc616949ddb318b77800a7f51bffa2a4c
 

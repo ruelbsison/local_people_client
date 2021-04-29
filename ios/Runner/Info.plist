@@ -11,7 +11,7 @@
 			<string>auth0</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>combineai.localpeople.client</string>
+				<string>combineai.localpeople.client-dev</string>
 			</array>
 		</dict>
 	</array>

@@ -31,6 +31,7 @@ class ClientApp extends StatelessWidget {
         localizationsDelegates: [
           LocalPeopleLocalizationsDelegate(),
           AppLocalizationsDelegate(),
+
         ],
         supportedLocales: [
           const Locale('en', ''), // English
