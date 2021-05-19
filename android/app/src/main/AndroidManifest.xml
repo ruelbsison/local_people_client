@@ -29,6 +29,8 @@
    <application
         android:label="Local People For Client"
         android:requestLegacyExternalStorage="true"
+        android:allowBackup="false"
+        android:fullBackupContent="false"
         android:icon="@mipmap/app_icon">
        <meta-data
            android:name="com.google.android.geo.API_KEY"

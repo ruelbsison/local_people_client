@@ -5,6 +5,7 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 //import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
+import 'package:data_connection_checker/data_connection_checker.dart';
 
 import 'package:local_people_core/core.dart';
 import 'package:local_people_core/login.dart';
@@ -92,6 +93,9 @@ class ClientApp extends StatelessWidget {
             } else if (state is Unauthenticated) {
               context.bloc<AuthenticationBloc>().add(AuthenticateUser());
               return LoginScreen();
+            } else if (state is ReAuthenticate) {
+              context.bloc<AuthenticationBloc>().add(ReAuthenticateUser());
+              return LoginScreen();
             } else if (state is Authenticated) {
               return MainScreen();
             }
@@ -151,10 +155,15 @@ class ClientApp extends StatelessWidget {
 
   static Widget runWidget(AppType appType) {
 
+    //DataConnectionChecker dataConnectionChecker = DataConnectionChecker();
+    //NetworkInfoImpl(dataConnectionChecker: dataConnectionChecker);
     //return TraderApp();
     //final UserRepository userRepository = UserRepositoryImpl();
     AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
       authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
+    );
+    RestClientInterceptor restClientInterceptor = RestClientInterceptor(
+      authLocalDataSource: authLocalDataSource,
     );
     AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceImpl(
      authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
@@ -162,7 +171,9 @@ class ClientApp extends StatelessWidget {
     // AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceByPass(
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     // );
-    ClientRemoteDataSource clientRemoteDataSource = ClientRemoteDataSourceImpl(baseUrl: RestAPIConfig().baseURL);
+    ClientRemoteDataSource clientRemoteDataSource = ClientRemoteDataSourceImpl(
+        dio: restClientInterceptor.dio,
+        baseUrl: RestAPIConfig().baseURL);
     TraderRemoteDataSource traderRemoteDataSource = TraderRemoteDataSourceImpl(baseUrl: RestAPIConfig().baseURL);
 
     JobRemoteDataSource jobRemoteDataSource = JobRemoteDataSourceImpl(RestAPIConfig().baseURL);
@@ -171,7 +182,6 @@ class ClientApp extends StatelessWidget {
 
     final AuthenticationRepository authenticationRepository =
     AuthenticationRepositoryImpl(
-      authLocalDataSource: authLocalDataSource,
       authenticationDataSource: authenticationDataSource,
     );
 
@@ -205,6 +215,7 @@ class ClientApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
             AuthenticationBloc(
+                authLocalDataSource: authLocalDataSource,
                 authenticationRepository: authenticationRepository)
               ..add(AppStarted()),
           ),

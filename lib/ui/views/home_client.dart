@@ -61,7 +61,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   AppBarWidget buildAppBar() {
     return AppBarWidget(
-      appBarPreferredSize: Size.fromHeight(60.0),
+      //appBarPreferredSize: Size.fromHeight(60.0),
       title: Text(
         AppLocalizations.of(context).appTitle,
       ),
