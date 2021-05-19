@@ -2,14 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
-import 'package:google_fonts/google_fonts.dart';
+//import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 
-import 'package:local_people_core/jobs.dart';
 import 'package:local_people_core/core.dart';
-import 'package:local_people_core/auth.dart';
 import 'package:local_people_core/login.dart';
+import 'package:local_people_core/auth.dart';
+import 'package:local_people_core/profile.dart';
+import 'package:local_people_core/jobs.dart';
 import 'ui/views/main_screen.dart';
 import 'ui/router.dart';
 //import 'injection_container.dart';
@@ -56,8 +57,8 @@ class ClientApp extends StatelessWidget {
     );*/
     return MaterialApp(
       title: AppLocalizations().clientAppTitle,
-      theme: AppThemeConfig().kLocalPeopleClientTheme, //themeData(Theme.of(context), AppThemeConfig.clientTheme),
-      darkTheme: AppThemeConfig().kLocalPeopleTraderTheme, //themeData(Theme.of(context), AppThemeConfig.lightTheme),
+      theme: AppThemeConfig().kLocalPeopleTraderTheme, //AppThemeConfig().kLocalPeopleClientTheme, //themeData(Theme.of(context), AppThemeConfig.clientTheme),
+      darkTheme: AppThemeConfig().kLocalPeopleClientTheme, //AppThemeConfig().kLocalPeopleTraderTheme, //themeData(Theme.of(context), AppThemeConfig.lightTheme),
       themeMode: ThemeMode.light,
       //fontFamily: 'Inter',
       localizationsDelegates: [
@@ -89,8 +90,8 @@ class ClientApp extends StatelessWidget {
             if (state is Uninitialized) {
               return LoginScreen();
             } else if (state is Unauthenticated) {
-              //context.bloc<AuthenticationBloc>().add(AuthenticateUser());
-              return MainScreen();
+              context.bloc<AuthenticationBloc>().add(AuthenticateUser());
+              return LoginScreen();
             } else if (state is Authenticated) {
               return MainScreen();
             }
@@ -100,10 +101,10 @@ class ClientApp extends StatelessWidget {
           },
         ),
         defaultScale: true,
-        //maxWidth: 812,
-        //minWidth: 375,
-        maxWidth: 2436,
-        minWidth: 1125,
+        maxWidth: 812,
+        minWidth: 375,
+        //maxWidth: 2436,
+        //minWidth: 1125,
         defaultName: MOBILE,
         breakpoints: [
           ResponsiveBreakpoint.autoScale(375, name: MOBILE),
@@ -153,11 +154,17 @@ class ClientApp extends StatelessWidget {
     //return TraderApp();
     //final UserRepository userRepository = UserRepositoryImpl();
     AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
-      authorizationConfig: AuthorizationConfig.devClientAuthorizationConfig(),
+      authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     );
     AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceImpl(
-      authorizationConfig: AuthorizationConfig.devClientAuthorizationConfig(),
+     authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     );
+    // AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceByPass(
+    //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
+    // );
+    ClientRemoteDataSource clientRemoteDataSource = ClientRemoteDataSourceImpl(baseUrl: RestAPIConfig().baseURL);
+    TraderRemoteDataSource traderRemoteDataSource = TraderRemoteDataSourceImpl(baseUrl: RestAPIConfig().baseURL);
+
     JobRemoteDataSource jobRemoteDataSource = JobRemoteDataSourceImpl(RestAPIConfig().baseURL);
     TagRemoteDataSource tagRemoteDataSource = TagRemoteDataSourceImpl(RestAPIConfig().baseURL);
     LocationRemoteDataSource locationRemoteDataSource = LocationRemoteDataSourceImpl(RestAPIConfig().baseURL);
@@ -168,7 +175,12 @@ class ClientApp extends StatelessWidget {
       authenticationDataSource: authenticationDataSource,
     );
 
-    JobRepository jobRepository = JobRepositoryImpl(
+    final ProfileRepository profileRepository = ProfileRepositoryImpl(
+        clientRemoteDataSource: clientRemoteDataSource,
+        traderRemoteDataSource: traderRemoteDataSource
+    );
+
+    final JobRepository jobRepository = JobRepositoryImpl(
         authLocalDataSource: authLocalDataSource,
         jobRemoteDataSource: jobRemoteDataSource
     );
@@ -177,6 +189,9 @@ class ClientApp extends StatelessWidget {
       providers: [
         RepositoryProvider<AuthenticationRepository>(
           create: (context) => authenticationRepository,
+        ),
+        RepositoryProvider<ProfileRepository>(
+          create: (context) => profileRepository,
         ),
         RepositoryProvider<JobRepository>(
           create: (context) => jobRepository,
@@ -194,9 +209,21 @@ class ClientApp extends StatelessWidget {
               ..add(AppStarted()),
           ),
           BlocProvider(
+            create: (context) => ProfileBloc(
+                profileRepository: profileRepository,
+                appType: appType,
+                authLocalDataSource: authLocalDataSource,
+            ),
+          ),
+          BlocProvider(
             create: (context) => JobBloc(
                 jobRepository: jobRepository,
                 appType: appType
+            ),
+          ),
+          BlocProvider(
+            create: (context) => JobFormBloc(
+                jobRepository: jobRepository
             ),
           ),
         ],
@@ -205,84 +232,3 @@ class ClientApp extends StatelessWidget {
     );
   }
 }
-
-// class ClientView extends StatefulWidget {
-//   @override
-//   _AppViewState createState() => _AppViewState();
-// }
-//
-// class _AppViewState extends State<ClientView> {
-//   final _navigatorKey = GlobalKey<NavigatorState>();
-//
-//   NavigatorState get _navigator => _navigatorKey.currentState;
-//
-//   @override
-//   Widget build(BuildContext context) {
-//     return MaterialApp(
-//       //theme: theme,
-//       title: AppLocalizations().clientAppTitle,
-//       theme: themeData(AppThemeConfig.lightTheme),
-//       darkTheme: themeData(AppThemeConfig.darkTheme),
-//       localizationsDelegates: [
-//         LocalPeopleLocalizationsDelegate(),
-//         AppLocalizationsDelegate(),
-//       ],
-//       supportedLocales: [
-//         const Locale('en', ''), // English
-//       ],
-//       debugShowCheckedModeBanner: false,
-//       navigatorKey: _navigatorKey,
-//       onGenerateRoute: ClientAppRouter.generateRoute,
-//       home: ResponsiveWrapper.builder(
-//         BlocBuilder<AuthenticationBloc, AuthenticationState>(
-//           builder: (context, state) {
-//             if (state is Uninitialized) {
-//               return LoginScreen();
-//             } else if (state is Unauthenticated) {
-//               return MainScreen();
-//             } else if (state is Authenticated) {
-//               return MainScreen();
-//             }
-//             return Container(
-//               child: Center(child: Text('Unhandle State $state')),
-//             );
-//           },
-//         ),
-//         maxWidth: 812,
-//         minWidth: 375,
-//         defaultName: MOBILE,
-//         breakpoints: [
-//           ResponsiveBreakpoint.autoScale(375, name: MOBILE),
-//           ResponsiveBreakpoint.resize(600, name: MOBILE),
-//           ResponsiveBreakpoint.resize(850, name: TABLET),
-//           ResponsiveBreakpoint.resize(1080, name: DESKTOP),
-//         ],
-//         //mediaQueryData: MediaQueryData(size: Size(375, 812), devicePixelRatio: 3),
-//       ),
-//       /*home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
-//         builder: (context, state) {
-//           if (state is Uninitialized) {
-//             return LoginScreen();
-//           } else if (state is Unauthenticated) {
-//             return MainScreen();
-//           } else if (state is Authenticated) {
-//             return MainScreen();
-//           }
-//           return Container(
-//             child: Center(child: Text('Unhandle State $state')),
-//           );
-//         },
-//       ),*/
-//       //initialRoute: ClientAppRouter.LOGIN,
-//     );
-//   }
-//
-//   // Apply font to our app's theme
-//   ThemeData themeData(ThemeData theme) {
-//     return theme.copyWith(
-//       textTheme: GoogleFonts.interTextTheme(
-//         theme.textTheme,
-//       ),
-//     );
-//   }
-// }

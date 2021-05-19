@@ -5,6 +5,8 @@ import '../widgets/package_card.dart';
 import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:local_people_core/jobs.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:local_people_core/profile.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   @override
@@ -35,32 +37,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     // Figma Flutter Generator DashboardWidget - FRAME
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-        appBar: AppBarWidget(
-          appBarPreferredSize: Size.fromHeight(60.0),
-          title: Text(
-            AppLocalizations.of(context).appTitle,
-          ),
-          subTitle: DateFormatUtil.getFormattedDate(),
-          appBar: AppBar(),
-          actions: <Widget>[
-            Container(
-              padding: EdgeInsets.only(right: 14.0),
-              child: ElevatedButton (
-                child: Text(
-                  LocalPeopleLocalizations.of(context).btnTitlePostJob,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                onPressed: ()  {
-                  AppRouter.pushPage(context, JobCreateScreen());
-                },
-              ),
-              alignment: Alignment.center,
-            )
-          ],
-        ),
+        appBar: buildAppBar(),
       /* body: ResponsiveWrapper(
         child: _buildBody2(context),
         // child: _buildBodyList(),
@@ -74,11 +51,69 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ResponsiveBreakpoint.autoScale(2460, name: '4K'),
         ],
       ),*/
-      body: _buildBody2(context),
+      //body: _buildBody2(context),
+      body: BlocProvider.value(
+        value: BlocProvider.of<ProfileBloc>(context),
+        child: buildBody(),
+      ),
     );
   }
 
-  Widget _buildBody2(BuildContext context) {
+  AppBarWidget buildAppBar() {
+    return AppBarWidget(
+      appBarPreferredSize: Size.fromHeight(60.0),
+      title: Text(
+        AppLocalizations.of(context).appTitle,
+      ),
+      subTitle: DateFormatUtil.getFormattedDate(),
+      appBar: AppBar(),
+      actions: <Widget>[
+        Container(
+          padding: EdgeInsets.only(right: 14.0),
+          child: ElevatedButton (
+            child: Text(
+              LocalPeopleLocalizations.of(context).btnTitlePostJob,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+            onPressed: ()  {
+              AppRouter.pushPage(context, JobCreateScreen());
+            },
+          ),
+          alignment: Alignment.center,
+        )
+      ],
+    );
+  }
+
+  Widget buildBody() { //BuildContext context) {
+    return BlocListener<ProfileBloc, ProfileState>(
+      listener: (context, state) {
+        if (state is ProfileDoesNotExists) {
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Creating Profile...')),
+            );
+          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent(profile: state.profile));
+        } else if (state is ProfileCreated) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
+          BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+        } else if (state is ProfileCreateFailed) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        } else if (state is ClientProfileLoaded) {
+          BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+        }
+      },
+      child: _buildBodyContent(context),
+    );
+  }
+
+  Widget _buildBodyContent(BuildContext context) {
+    BlocProvider.of<ProfileBloc>(context).add(ProfileGetEvent());
     final Size size = MediaQuery.of(context).size;
     return Stack (
         children: <Widget>[
@@ -164,7 +199,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Top Rated in your Area'),
                   // SizedBox(height: 10.0),
-                  _buildFeaturedSection(),
+                  _buildTopRatedSection(),
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Latest Activity'),
                   // SizedBox(height: 10.0),
@@ -201,6 +236,59 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   _buildFeaturedSection() {
+    return Container(
+      height: 119.0,
+      // padding: EdgeInsets.only(left: 16, right: 16),
+      // padding: EdgeInsets.symmetric(horizontal: 15.0),
+      alignment: Alignment.centerLeft,
+      child: ListView (
+        primary: false,
+        padding: EdgeInsets.symmetric(horizontal: 15.0),
+        scrollDirection: Axis.horizontal,
+        shrinkWrap: true,
+        //physics: NeverScrollableScrollPhysics(),
+        children: <Widget> [
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 01'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 02'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 03'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 04'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 05'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 06'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 07'),
+          ),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+            child: ProviderCard(name: 'Provider Name 08'),
+          ),
+        ],
+      ),
+      /* decoration: BoxDecoration(
+          color : Color.fromRGBO(50, 50, 50, 1),
+        ),*/
+    );
+  }
+
+  _buildTopRatedSection() {
     return Container(
       height: 119.0,
       // padding: EdgeInsets.only(left: 16, right: 16),
