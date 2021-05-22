@@ -92,12 +92,20 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileDoesNotExists) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent(profile: state.profile));
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               const SnackBar(content: Text('Creating Profile...')),
             );
-          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent(profile: state.profile));
+        } else if (state is ProfileLoading) {
+          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
+              const SnackBar(content: Text('Creating Loading...')),
+            );
         } else if (state is ProfileCreated) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));

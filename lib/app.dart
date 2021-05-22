@@ -155,8 +155,8 @@ class ClientApp extends StatelessWidget {
 
   static Widget runWidget(AppType appType) {
 
-    //DataConnectionChecker dataConnectionChecker = DataConnectionChecker();
-    //NetworkInfoImpl(dataConnectionChecker: dataConnectionChecker);
+    DataConnectionChecker dataConnectionChecker = DataConnectionChecker();
+    NetworkInfoImpl networkInfo = NetworkInfoImpl(dataConnectionChecker: dataConnectionChecker);
     //return TraderApp();
     //final UserRepository userRepository = UserRepositoryImpl();
     AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
@@ -171,27 +171,45 @@ class ClientApp extends StatelessWidget {
     // AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceByPass(
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     // );
+    ClientRestApiClient clientRestApiClient = ClientRestApiClient(
+        restClientInterceptor.dio,
+        baseUrl: RestAPIConfig().baseURL,
+    );
+    TraderRestApiClient traderRestApiClient = TraderRestApiClient(
+        restClientInterceptor.dio,
+        baseUrl: RestAPIConfig().baseURL,
+    );
     ClientRemoteDataSource clientRemoteDataSource = ClientRemoteDataSourceImpl(
-        dio: restClientInterceptor.dio,
-        baseUrl: RestAPIConfig().baseURL);
-    TraderRemoteDataSource traderRemoteDataSource = TraderRemoteDataSourceImpl(baseUrl: RestAPIConfig().baseURL);
+      clientRestApiClient: clientRestApiClient,
+    );
+    TraderRemoteDataSource traderRemoteDataSource = TraderRemoteDataSourceImpl(
+      traderRestApiClient: traderRestApiClient,
+    );
 
-    JobRemoteDataSource jobRemoteDataSource = JobRemoteDataSourceImpl(RestAPIConfig().baseURL);
-    TagRemoteDataSource tagRemoteDataSource = TagRemoteDataSourceImpl(RestAPIConfig().baseURL);
-    LocationRemoteDataSource locationRemoteDataSource = LocationRemoteDataSourceImpl(RestAPIConfig().baseURL);
+    JobRestApiClient jobRestApiClient = JobRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    JobRemoteDataSource jobRemoteDataSource = JobRemoteDataSourceImpl(
+      jobRestApiClient: jobRestApiClient,
+    );
+    //TagRemoteDataSource tagRemoteDataSource = TagRemoteDataSourceImpl(RestAPIConfig().baseURL);
+    //LocationRemoteDataSource locationRemoteDataSource = LocationRemoteDataSourceImpl(RestAPIConfig().baseURL);
 
     final AuthenticationRepository authenticationRepository =
     AuthenticationRepositoryImpl(
+      networkInfo: networkInfo,
       authenticationDataSource: authenticationDataSource,
     );
 
     final ProfileRepository profileRepository = ProfileRepositoryImpl(
+        networkInfo: networkInfo,
         clientRemoteDataSource: clientRemoteDataSource,
         traderRemoteDataSource: traderRemoteDataSource
     );
 
     final JobRepository jobRepository = JobRepositoryImpl(
-        authLocalDataSource: authLocalDataSource,
+        networkInfo: networkInfo,
         jobRemoteDataSource: jobRemoteDataSource
     );
 
