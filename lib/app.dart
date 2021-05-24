@@ -12,6 +12,7 @@ import 'package:local_people_core/login.dart';
 import 'package:local_people_core/auth.dart';
 import 'package:local_people_core/profile.dart';
 import 'package:local_people_core/jobs.dart';
+import 'package:local_people_core/messages.dart';
 import 'ui/views/main_screen.dart';
 import 'ui/router.dart';
 //import 'injection_container.dart';
@@ -172,11 +173,13 @@ class ClientApp extends StatelessWidget {
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     // );
     ClientRestApiClient clientRestApiClient = ClientRestApiClient(
+        //RestAPIConfig.getDioOptions(),
         restClientInterceptor.dio,
         baseUrl: RestAPIConfig().baseURL,
     );
     TraderRestApiClient traderRestApiClient = TraderRestApiClient(
-        restClientInterceptor.dio,
+      //RestAPIConfig.getDioOptions(),
+      restClientInterceptor.dio,
         baseUrl: RestAPIConfig().baseURL,
     );
     ClientRemoteDataSource clientRemoteDataSource = ClientRemoteDataSourceImpl(
@@ -193,8 +196,30 @@ class ClientApp extends StatelessWidget {
     JobRemoteDataSource jobRemoteDataSource = JobRemoteDataSourceImpl(
       jobRestApiClient: jobRestApiClient,
     );
-    //TagRemoteDataSource tagRemoteDataSource = TagRemoteDataSourceImpl(RestAPIConfig().baseURL);
-    //LocationRemoteDataSource locationRemoteDataSource = LocationRemoteDataSourceImpl(RestAPIConfig().baseURL);
+
+    TagRestApiClient tagRestApiClient = TagRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    TagRemoteDataSource tagRemoteDataSource = TagRemoteDataSourceImpl(
+        tagRestApiClient: tagRestApiClient
+    );
+
+    LocationRestApiClient locationRestApiClient = LocationRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    LocationRemoteDataSource locationRemoteDataSource = LocationRemoteDataSourceImpl(
+        locationRestApiClient: locationRestApiClient,
+    );
+
+    MessageRestApiClient messageRestApiClient = MessageRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    MessageRemoteDataSource messageRemoteDataSource = MessageRemoteDataSourceImpl(
+      messageRestApiClient: messageRestApiClient,
+    );
 
     final AuthenticationRepository authenticationRepository =
     AuthenticationRepositoryImpl(
@@ -213,6 +238,21 @@ class ClientApp extends StatelessWidget {
         jobRemoteDataSource: jobRemoteDataSource
     );
 
+    final TagRepository tagRepository = TagRepositoryImpl(
+        networkInfo: networkInfo,
+        tagRemoteDataSource: tagRemoteDataSource,
+    );
+
+    final LocationRepository locationRepository = LocationRepositoryImpl(
+      networkInfo: networkInfo,
+      locationRemoteDataSource: locationRemoteDataSource,
+    );
+
+    final MessageRepository messageRepository = MessageRepositoryImpl(
+      networkInfo: networkInfo,
+      messageRemoteDataSource: messageRemoteDataSource,
+    );
+
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthenticationRepository>(
@@ -223,6 +263,15 @@ class ClientApp extends StatelessWidget {
         ),
         RepositoryProvider<JobRepository>(
           create: (context) => jobRepository,
+        ),
+        RepositoryProvider<TagRepository>(
+          create: (context) => tagRepository,
+        ),
+        RepositoryProvider<LocationRepository>(
+          create: (context) => locationRepository,
+        ),
+        RepositoryProvider<MessageRepository>(
+          create: (context) => messageRepository,
         ),
       ],
       child: MultiBlocProvider(
@@ -245,9 +294,20 @@ class ClientApp extends StatelessWidget {
             ),
           ),
           BlocProvider(
+            create: (context) => TagBloc(
+              tagRepository: tagRepository,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => LocationBloc(
+              locationRepository: locationRepository,
+            ),
+          ),
+          BlocProvider(
             create: (context) => JobBloc(
                 jobRepository: jobRepository,
-                appType: appType
+                appType: appType,
+                authLocalDataSource: authLocalDataSource,
             ),
           ),
           BlocProvider(

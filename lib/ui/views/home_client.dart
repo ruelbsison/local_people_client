@@ -92,8 +92,9 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     return BlocListener<ProfileBloc, ProfileState>(
       listener: (context, state) {
         if (state is ProfileDoesNotExists) {
+          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent());
+        } if (state is ProfileCreating) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent(profile: state.profile));
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
@@ -104,15 +105,17 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
           ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
-              const SnackBar(content: Text('Creating Loading...')),
+              const SnackBar(content: Text('Loading Profile...')),
             );
         } else if (state is ProfileCreated) {
+          //AppConfig.of(context).data.setUserId(state.profile.id);
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
           AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
-          BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+          //BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
         } else if (state is ProfileCreateFailed) {
           ScaffoldMessenger.of(context).hideCurrentSnackBar();
         } else if (state is ClientProfileLoaded) {
+          //AppConfig.of(context).data.setUserId(state.profile.id);
           BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
         }
       },
