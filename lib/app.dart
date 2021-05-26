@@ -17,6 +17,7 @@ import 'ui/views/main_screen.dart';
 import 'ui/router.dart';
 //import 'injection_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import'dart:io' show Platform;
 
 class ClientApp extends StatelessWidget {
   @override
@@ -160,14 +161,23 @@ class ClientApp extends StatelessWidget {
     NetworkInfoImpl networkInfo = NetworkInfoImpl(dataConnectionChecker: dataConnectionChecker);
     //return TraderApp();
     //final UserRepository userRepository = UserRepositoryImpl();
+    //Theme.of(context).platform == TargetPlatform.iOS
     AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
       authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     );
     RestClientInterceptor restClientInterceptor = RestClientInterceptor(
       authLocalDataSource: authLocalDataSource,
     );
+
+    AuthorizationConfig authorizationConfig;
+    if (Platform.isIOS == true) {
+      authorizationConfig = AuthorizationConfig.prodIOSClientAuthorizationConfig();
+    }
+    if (Platform.isAndroid == true) {
+      authorizationConfig = AuthorizationConfig.prodClientAuthorizationConfig();
+    }
     AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceImpl(
-     authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
+      authorizationConfig: authorizationConfig,
     );
     // AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceByPass(
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
@@ -313,6 +323,13 @@ class ClientApp extends StatelessWidget {
           BlocProvider(
             create: (context) => JobFormBloc(
                 jobRepository: jobRepository
+            ),
+          ),
+          BlocProvider(
+            create: (context) => MessageBloc(
+              messageRepository: messageRepository,
+              appType: appType,
+              authLocalDataSource: authLocalDataSource,
             ),
           ),
         ],

@@ -1,48 +1,39 @@
 import 'package:flutter/material.dart';
-import 'package:uuid/uuid.dart';
+//import 'package:uuid/uuid.dart';
+import 'package:local_people_core/profile.dart';
+import 'package:local_people_core/core.dart';
 
 class ProviderCard extends StatelessWidget {
-  final String name;
+  final TraderProfile profile;
 
   ProviderCard({
     Key key,
-    @required this.name,
+    @required this.profile,
   }) : super(key: key);
 
-  static final uuid = Uuid();
-  final String imgTag = uuid.v4();
-  final String titleTag = uuid.v4();
-  final String authorTag = uuid.v4();
+  // static final uuid = Uuid();
+  // final String imgTag = uuid.v4();
+  // final String titleTag = uuid.v4();
+  // final String authorTag = uuid.v4();
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData themeData = Theme.of(context);
-    return Container(
-        width: 119,
-        height: 119,
-        decoration: BoxDecoration(
-          borderRadius : BorderRadius.only(
-            topLeft: Radius.circular(3),
-            topRight: Radius.circular(3),
-            bottomLeft: Radius.circular(3),
-            bottomRight: Radius.circular(3),
-          ),
-          color : Color.fromRGBO(196, 196, 196, 1),
-          /* border : Border.all(
-            color: Color.fromRGBO(0, 0, 0, 1),
-            width: 2,
-          ),*/
+    final ThemeData theme = Theme.of(context);
+    return InkWell(
+        onTap: (){
+          AppRouter.pushPage(context, ProfileScreen(profile: profile,));
+    },
+    child: Card(
+        elevation: 2,
+        color: Color.fromRGBO(196, 196, 196, 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(3.0),
         ),
         child: Padding (
           padding: EdgeInsets.all(12.0),
-          child: Text(name, textAlign: TextAlign.left, style: TextStyle(
-            color: Color.fromRGBO(0, 0, 0, 1),
-            fontFamily: 'Inter',
-            fontSize: 14,
-            letterSpacing: 0 /*percentages not used in flutter. defaulting to zero*/,
-            fontWeight: FontWeight.bold,
-          ),),
+          child: Text(profile.fullName, textAlign: TextAlign.left, style: theme.textTheme.bodyText1,),
         )
+    ),
     );
   }
 }

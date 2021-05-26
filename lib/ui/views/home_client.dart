@@ -89,41 +89,75 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   Widget buildBody() { //BuildContext context) {
-    return BlocListener<ProfileBloc, ProfileState>(
-      listener: (context, state) {
+    return BlocBuilder<ProfileBloc, ProfileState>(
+      builder: (context, state) {
         if (state is ProfileDoesNotExists) {
-          BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent());
+          context.read<ProfileBloc>().add(ProfileCreateEvent());
+          return LoadingWidget();
         } if (state is ProfileCreating) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Creating Profile...')),
-            );
+          return LoadingWidget();
         } else if (state is ProfileLoading) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          ScaffoldMessenger.of(context)
-            ..hideCurrentSnackBar()
-            ..showSnackBar(
-              const SnackBar(content: Text('Loading Profile...')),
-            );
+          return LoadingWidget();
         } else if (state is ProfileCreated) {
-          //AppConfig.of(context).data.setUserId(state.profile.id);
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
           AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
-          //BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+          context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+          return LoadingWidget();
         } else if (state is ProfileCreateFailed) {
-          ScaffoldMessenger.of(context).hideCurrentSnackBar();
+          return ErrorWidget(state.toString());
+        } else if (state is ProfileNotLoaded) {
+          return ErrorWidget(state.toString());
+        } else if (state is ProfileTraderTopRatedLoading) {
+          return LoadingWidget();
+        } else if (state is ProfileTraderTopRatedFailed) {
+          return ErrorWidget(state.toString());
         } else if (state is ClientProfileLoaded) {
-          //AppConfig.of(context).data.setUserId(state.profile.id);
-          BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+          context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+          return LoadingWidget();
+        } else if (state is ProfileTraderTopRatedCompleted) {
+          return _buildBodyContent(state.topRatedTraders);
         }
+        return ErrorWidget('Unhandle State $state');
       },
-      child: _buildBodyContent(context),
     );
   }
 
-  Widget _buildBodyContent(BuildContext context) {
+  // Widget buildBody() { //BuildContext context) {
+  //   return BlocListener<ProfileBloc, ProfileState>(
+  //     listener: (context, state) {
+  //       if (state is ProfileDoesNotExists) {
+  //         BlocProvider.of<ProfileBloc>(context).add(ProfileCreateEvent());
+  //       } if (state is ProfileCreating) {
+  //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //         ScaffoldMessenger.of(context)
+  //           ..hideCurrentSnackBar()
+  //           ..showSnackBar(
+  //             const SnackBar(content: Text('Creating Profile...')),
+  //           );
+  //       } else if (state is ProfileLoading) {
+  //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //         ScaffoldMessenger.of(context)
+  //           ..hideCurrentSnackBar()
+  //           ..showSnackBar(
+  //             const SnackBar(content: Text('Loading Profile...')),
+  //           );
+  //       } else if (state is ProfileCreated) {
+  //         //AppConfig.of(context).data.setUserId(state.profile.id);
+  //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //         AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
+  //         //BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+  //       } else if (state is ProfileCreateFailed) {
+  //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //       } else if (state is ClientProfileLoaded) {
+  //         ScaffoldMessenger.of(context).hideCurrentSnackBar();
+  //         //AppConfig.of(context).data.setUserId(state.profile.id);
+  //         BlocProvider.of<ProfileBloc>(context).add(ProfileGetTraderTopRatedEvent());
+  //       }
+  //     },
+  //     child: _buildBodyContent(context),
+  //   );
+  // }
+
+  Widget _buildBodyContent(List<TraderProfile> topRatedTraders) {
     BlocProvider.of<ProfileBloc>(context).add(ProfileGetEvent());
     final Size size = MediaQuery.of(context).size;
     return Stack (
@@ -202,22 +236,22 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Your Previous Providers'),
                   // SizedBox(height: 10.0),
-                  _buildFeaturedSection(),
+                  _buildFeaturedSection(topRatedTraders),
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Ready to book now'),
                   // SizedBox(height: 10.0),
-                  _buildFeaturedSection(),
+                  _buildFeaturedSection(topRatedTraders),
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Top Rated in your Area'),
                   // SizedBox(height: 10.0),
-                  _buildTopRatedSection(),
+                  _buildTopRatedSection(topRatedTraders),
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Latest Activity'),
                   // SizedBox(height: 10.0),
-                  _buildFeaturedSection(),
+                  _buildFeaturedSection(topRatedTraders),
                   // SizedBox(height: 10.0),
                   _buildSectionTitle('Most Recommended'),
-                  _buildMostRecommendedSection(),
+                  _buildMostRecommendedSection(topRatedTraders),
                 ],
               ),
             //),
@@ -246,162 +280,66 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     );
   }
 
-  _buildFeaturedSection() {
+  _buildFeaturedSection(List<TraderProfile> featuredTraders) {
     return Container(
       height: 119.0,
       // padding: EdgeInsets.only(left: 16, right: 16),
       // padding: EdgeInsets.symmetric(horizontal: 15.0),
       alignment: Alignment.centerLeft,
-      child: ListView (
+      child: ListView.builder(
         primary: false,
         padding: EdgeInsets.symmetric(horizontal: 15.0),
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
-        //physics: NeverScrollableScrollPhysics(),
-        children: <Widget> [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 01'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 02'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 03'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 04'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 05'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 06'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 07'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 08'),
-          ),
-        ],
+        itemCount: featuredTraders.length,
+        itemBuilder: (context, index) =>
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+              child: ProviderCard(profile: featuredTraders[index]),
+            ),
       ),
-      /* decoration: BoxDecoration(
-          color : Color.fromRGBO(50, 50, 50, 1),
-        ),*/
     );
   }
 
-  _buildTopRatedSection() {
+  _buildTopRatedSection(List<TraderProfile> topRatedTraders) {
     return Container(
       height: 119.0,
       // padding: EdgeInsets.only(left: 16, right: 16),
       // padding: EdgeInsets.symmetric(horizontal: 15.0),
       alignment: Alignment.centerLeft,
-      child: ListView (
+      child: ListView.builder(
         primary: false,
         padding: EdgeInsets.symmetric(horizontal: 15.0),
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
-        //physics: NeverScrollableScrollPhysics(),
-        children: <Widget> [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 01'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 02'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 03'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 04'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 05'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 06'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 07'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Provider Name 08'),
-          ),
-        ],
+        itemCount: topRatedTraders.length,
+        itemBuilder: (context, index) =>
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+              child: ProviderCard(profile: topRatedTraders[index]),
+            ),
       ),
-      /* decoration: BoxDecoration(
-          color : Color.fromRGBO(50, 50, 50, 1),
-        ),*/
     );
   }
 
-  _buildMostRecommendedSection() {
+  _buildMostRecommendedSection(List<TraderProfile> mostRecommendedTraders) {
     return Container(
       height: 120.0,
       // padding: EdgeInsets.only(left: 16, right: 16),
       // padding: EdgeInsets.symmetric(horizontal: 15.0),
       alignment: Alignment.centerLeft,
-      child: ListView (
+      child: ListView.builder(
         primary: false,
         padding: EdgeInsets.symmetric(horizontal: 15.0),
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
-        //physics: NeverScrollableScrollPhysics(),
-        children: <Widget> [
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-          Padding(
-            padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-            child: ProviderCard(name: 'Supplier Name / Trade'),
-          ),
-        ],
+        itemCount: mostRecommendedTraders.length,
+        itemBuilder: (context, index) =>
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+              child: ProviderCard(profile: mostRecommendedTraders[index]),
+            ),
       ),
-      /* decoration: BoxDecoration(
-          color : Color.fromRGBO(50, 50, 50, 1),
-        ),*/
     );
   }
 }
