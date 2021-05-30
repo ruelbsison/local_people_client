@@ -89,12 +89,15 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   Widget buildBody() { //BuildContext context) {
+    context.read<ProfileBloc>().add(ProfileGetEvent());
     return BlocBuilder<ProfileBloc, ProfileState>(
       builder: (context, state) {
         if (state is ProfileDoesNotExists) {
           context.read<ProfileBloc>().add(ProfileCreateEvent());
           return LoadingWidget();
-        } if (state is ProfileCreating) {
+        } else if (state is ProfileInitialState) {
+          return LoadingWidget();
+        } else if (state is ProfileCreating) {
           return LoadingWidget();
         } else if (state is ProfileLoading) {
           return LoadingWidget();
@@ -158,7 +161,6 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   // }
 
   Widget _buildBodyContent(List<TraderProfile> topRatedTraders) {
-    BlocProvider.of<ProfileBloc>(context).add(ProfileGetEvent());
     final Size size = MediaQuery.of(context).size;
     return Stack (
         children: <Widget>[
