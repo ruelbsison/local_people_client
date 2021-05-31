@@ -162,9 +162,11 @@ class ClientApp extends StatelessWidget {
     //return TraderApp();
     //final UserRepository userRepository = UserRepositoryImpl();
     //Theme.of(context).platform == TargetPlatform.iOS
-    AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
-      authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
-    );
+    // AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
+    //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
+    // );
+    locatorInit(AuthorizationConfig.prodClientAuthorizationConfig());
+    AuthLocalDataSource authLocalDataSource = sl<AuthLocalDataSource>();
     RestClientInterceptor restClientInterceptor = RestClientInterceptor(
       authLocalDataSource: authLocalDataSource,
     );
@@ -316,13 +318,17 @@ class ClientApp extends StatelessWidget {
           BlocProvider(
             create: (context) => JobBloc(
                 jobRepository: jobRepository,
+                tagRepository: tagRepository,
+                locationRepository: locationRepository,
                 appType: appType,
                 authLocalDataSource: authLocalDataSource,
             ),
           ),
           BlocProvider(
             create: (context) => JobFormBloc(
-                jobRepository: jobRepository
+                jobRepository: jobRepository,
+                tagRepository: tagRepository,
+              locationRepository: locationRepository
             ),
           ),
           BlocProvider(

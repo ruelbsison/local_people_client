@@ -67,24 +67,38 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       ),
       subTitle: DateFormatUtil.getFormattedDate(),
       appBar: AppBar(),
-      actions: <Widget>[
-        Container(
-          padding: EdgeInsets.only(right: 14.0),
-          child: ElevatedButton (
-            child: Text(
-              LocalPeopleLocalizations.of(context).btnTitlePostJob,
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.normal,
-              ),
+      actions: <Widget> [
+        ElevatedButton (
+          child: Text(
+            LocalPeopleLocalizations.of(context).btnTitlePostJob,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.normal,
             ),
-            onPressed: ()  {
-              AppRouter.pushPage(context, JobCreateScreen());
-            },
           ),
-          alignment: Alignment.center,
-        )
+          onPressed: ()  {
+            AppRouter.pushPage(context, JobCreateScreen());
+          },
+        ),
       ],
+      // actions: <Widget>[
+      //   Container(
+      //     padding: EdgeInsets.only(right: 14.0),
+      //     child: ElevatedButton (
+      //       child: Text(
+      //         LocalPeopleLocalizations.of(context).btnTitlePostJob,
+      //         style: TextStyle(
+      //           fontSize: 14,
+      //           fontWeight: FontWeight.normal,
+      //         ),
+      //       ),
+      //       onPressed: ()  {
+      //         AppRouter.pushPage(context, JobCreateScreen());
+      //       },
+      //     ),
+      //     alignment: Alignment.center,
+      //   )
+      //],
     );
   }
 
