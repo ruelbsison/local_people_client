@@ -6,6 +6,7 @@ import 'package:responsive_framework/responsive_wrapper.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:logging/logging.dart';
 import 'package:data_connection_checker/data_connection_checker.dart';
+//import 'package:provider/provider.dart';
 
 import 'package:local_people_core/core.dart';
 import 'package:local_people_core/login.dart';
@@ -93,10 +94,10 @@ class ClientApp extends StatelessWidget {
             if (state is Uninitialized) {
               return LoginScreen();
             } else if (state is Unauthenticated) {
-              context.bloc<AuthenticationBloc>().add(AuthenticateUser());
+              context.read<AuthenticationBloc>().add(AuthenticateUser());
               return LoginScreen();
             } else if (state is ReAuthenticate) {
-              context.bloc<AuthenticationBloc>().add(ReAuthenticateUser());
+              context.read<AuthenticationBloc>().add(ReAuthenticateUser());
               return LoginScreen();
             } else if (state is Authenticated) {
               return MainScreen();
@@ -165,12 +166,6 @@ class ClientApp extends StatelessWidget {
     // AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     // );
-    locatorInit(AuthorizationConfig.prodClientAuthorizationConfig());
-    AuthLocalDataSource authLocalDataSource = sl<AuthLocalDataSource>();
-    RestClientInterceptor restClientInterceptor = RestClientInterceptor(
-      authLocalDataSource: authLocalDataSource,
-    );
-
     AuthorizationConfig authorizationConfig;
     if (Platform.isIOS == true) {
       authorizationConfig = AuthorizationConfig.prodIOSClientAuthorizationConfig();
@@ -178,6 +173,13 @@ class ClientApp extends StatelessWidget {
     if (Platform.isAndroid == true) {
       authorizationConfig = AuthorizationConfig.prodClientAuthorizationConfig();
     }
+    locatorInit(authorizationConfig);
+    AuthLocalDataSource authLocalDataSource = sl<AuthLocalDataSource>();
+    RestClientInterceptor restClientInterceptor = RestClientInterceptor(
+      authLocalDataSource: authLocalDataSource,
+    );
+
+
     AuthenticationDataSource authenticationDataSource = AuthenticationDataSourceImpl(
       authorizationConfig: authorizationConfig,
     );
@@ -347,6 +349,12 @@ class ClientApp extends StatelessWidget {
           ),
         ],
         child: ClientApp(),
+        // child: MultiProvider(
+        //   providers: [
+        //     ChangeNotifierProvider(create: (_) => ClientProfile()),
+        //   ],
+        //   child: ClientApp(),
+        // ),
       ),
     );
   }

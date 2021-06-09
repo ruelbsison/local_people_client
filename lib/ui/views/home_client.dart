@@ -7,13 +7,17 @@ import 'package:local_people_core/jobs.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:local_people_core/profile.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:after_layout/after_layout.dart';
 
 class ClientHomeScreen extends StatefulWidget {
   @override
   _ClientHomeScreenState createState() => _ClientHomeScreenState();
+
+  ClientProfile profile;
 }
 
-class _ClientHomeScreenState extends State<ClientHomeScreen> {
+class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMixin<ClientHomeScreen> {
 
   void printScreenInformation() {
     print('Device width dp:${1.sw}dp');
@@ -28,6 +32,28 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
     print('0.5 times the screen width:${0.5.sw}dp');
     print('0.5 times the screen height:${0.5.sh}dp');
     print('Screen orientation:${ScreenUtil().orientation}');
+  }
+
+  void requestPermission() async {
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.storage,
+      Permission.location,
+      Permission.accessMediaLocation,
+      Permission.photos,
+      Permission.camera,
+      Permission.mediaLibrary,
+    ].request();
+    print(statuses[Permission.storage]);
+    print(statuses[Permission.location]);
+    print(statuses[Permission.accessMediaLocation]);
+    print(statuses[Permission.photos]);
+    print(statuses[Permission.camera]);
+    print(statuses[Permission.mediaLibrary]);
+  }
+
+  @override
+  void afterFirstLayout(BuildContext context) async {
+    await requestPermission();
   }
 
   @override
@@ -60,6 +86,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
   }
 
   AppBarWidget buildAppBar() {
+    final theme = Theme.of(context);
     return AppBarWidget(
       //appBarPreferredSize: Size.fromHeight(60.0),
       title: Text(
@@ -68,74 +95,141 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
       subTitle: DateFormatUtil.getFormattedDate(),
       appBar: AppBar(),
       actions: <Widget> [
-        ElevatedButton (
+        OutlinedButton (
           child: Text(
             LocalPeopleLocalizations.of(context).btnTitlePostJob,
-            style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.normal,
-            ),
+              style: theme.textTheme.button,
           ),
           onPressed: ()  {
             AppRouter.pushPage(context, JobCreateScreen());
           },
         ),
       ],
-      // actions: <Widget>[
-      //   Container(
-      //     padding: EdgeInsets.only(right: 14.0),
-      //     child: ElevatedButton (
-      //       child: Text(
-      //         LocalPeopleLocalizations.of(context).btnTitlePostJob,
-      //         style: TextStyle(
-      //           fontSize: 14,
-      //           fontWeight: FontWeight.normal,
-      //         ),
-      //       ),
-      //       onPressed: ()  {
-      //         AppRouter.pushPage(context, JobCreateScreen());
-      //       },
-      //     ),
-      //     alignment: Alignment.center,
-      //   )
-      //],
     );
   }
 
   Widget buildBody() { //BuildContext context) {
-    context.read<ProfileBloc>().add(ProfileGetEvent());
-    return BlocBuilder<ProfileBloc, ProfileState>(
-      builder: (context, state) {
-        if (state is ProfileDoesNotExists) {
-          context.read<ProfileBloc>().add(ProfileCreateEvent());
+    try {
+      ClientProfile clientProfile = sl<ClientProfile>();
+      if (clientProfile  == null)
+        context.read<ProfileBloc>().add(ProfileGetEvent());
+      else {
+        widget.profile = clientProfile;
+        context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+      }
+    } catch(e) {
+      context.read<ProfileBloc>().add(ProfileGetEvent());
+      print(e.toString());
+    }
+    return BlocConsumer<ProfileBloc, ProfileState>(
+        listenWhen: (previous, current) {
+          // return true/false to determine whether or not
+          // to invoke listener with state
+          print('listenWhen: previous is $previous, current is $current');
+
+          if (previous is ProfileCreating &&
+              current is ProfileCreated) {
+            locatorAddClientProfile(current.profile);
+            widget.profile = current.profile;
+            AppRouter.pushPage(context, ProfileScreen(profile: current.profile,));
+            context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+            //return true;
+          } else if (previous is ProfileLoading &&
+              current is ClientProfileLoaded) {
+            locatorAddClientProfile(current.profile);
+            widget.profile = current.profile;
+            context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+            //return true;
+          }
+          return false;
+        },
+        listener: (context, state) {
+          // do stuff here based on BlocA's state
+          print('listener: current is $state');
+
+          // if (state is ProfileCreated) {
+          //   widget.profile = state.profile;
+          //   AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
+          //   context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+          // } else if (state is ClientProfileLoaded) {
+          //   widget.profile = state.profile;
+          //   context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+          // }
+        },
+        buildWhen: (previous, current) {
+          // return true/false to determine whether or not
+          // to rebuild the widget with state
+          print('buildWhen: previous is $previous, current is $current');
+          if (previous is ProfileInitialState &&
+              current is ProfileLoading) {
+            return true;
+          } else if (previous is ProfileLoading &&
+              current is ProfileNotLoaded) {
+            return true;
+          } else if (previous is ProfileCreating &&
+              current is ProfileCreateFailed) {
+            return true;
+          } else if (previous is ClientProfileGetLoading &&
+              current is ClientProfileGetFailed) {
+            return true;
+          } else if (previous is ProfileTraderTopRatedLoading &&
+              current is ProfileTraderTopRatedFailed) {
+            return true;
+          } else if (previous is ProfileTraderTopRatedLoading &&
+              current is ProfileTraderTopRatedCompleted) {
+            return true;
+          }
+          return false;
+        },
+        builder: (context, state) {
+          // return widget here based on BlocA's state
+          print('builder: current is $state');
+          if (state is ProfileTraderTopRatedFailed
+          || state is ClientProfileGetFailed
+          || state is ProfileCreateFailed
+              || state is ProfileNotLoaded
+              || state is ClientProfileUpdateFailed
+              || state is TraderProfileUpdateFailed
+              || state is TraderProfileGetFailed) {
+            return ErrorWidget('Error: $state');
+          } else if (state is ProfileTraderTopRatedCompleted) {
+            return _buildBodyContent(state.topRatedTraders);
+          }
           return LoadingWidget();
-        } else if (state is ProfileInitialState) {
-          return LoadingWidget();
-        } else if (state is ProfileCreating) {
-          return LoadingWidget();
-        } else if (state is ProfileLoading) {
-          return LoadingWidget();
-        } else if (state is ProfileCreated) {
-          AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
-          context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-          return LoadingWidget();
-        } else if (state is ProfileCreateFailed) {
-          return ErrorWidget(state.toString());
-        } else if (state is ProfileNotLoaded) {
-          return ErrorWidget(state.toString());
-        } else if (state is ProfileTraderTopRatedLoading) {
-          return LoadingWidget();
-        } else if (state is ProfileTraderTopRatedFailed) {
-          return ErrorWidget(state.toString());
-        } else if (state is ClientProfileLoaded) {
-          context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-          return LoadingWidget();
-        } else if (state is ProfileTraderTopRatedCompleted) {
-          return _buildBodyContent(state.topRatedTraders);
         }
-        return ErrorWidget('Unhandle State $state');
-      },
     );
+    // return BlocBuilder<ProfileBloc, ProfileState>(
+    //   builder: (context, state) {
+    //     if (state is ProfileDoesNotExists) {
+    //       context.read<ProfileBloc>().add(ProfileCreateEvent());
+    //       return LoadingWidget();
+    //     } else if (state is ProfileInitialState) {
+    //       return LoadingWidget();
+    //     } else if (state is ProfileCreating) {
+    //       return LoadingWidget();
+    //     } else if (state is ProfileLoading) {
+    //       return LoadingWidget();
+    //     } else if (state is ProfileCreated) {
+    //       AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
+    //       //context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+    //       return LoadingWidget();
+    //     } else if (state is ProfileCreateFailed) {
+    //       return ErrorWidget(state.toString());
+    //     } else if (state is ProfileNotLoaded) {
+    //       return ErrorWidget(state.toString());
+    //     } else if (state is ProfileTraderTopRatedLoading) {
+    //       return LoadingWidget();
+    //     } else if (state is ProfileTraderTopRatedFailed) {
+    //       return ErrorWidget(state.toString());
+    //     } else if (state is ClientProfileLoaded) {
+    //       context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+    //       return LoadingWidget();
+    //     } else if (state is ProfileTraderTopRatedCompleted) {
+    //       return _buildBodyContent(state.topRatedTraders);
+    //     }
+    //     return ErrorWidget('Unhandle State $state');
+    //   },
+    // );
   }
 
   // Widget buildBody() { //BuildContext context) {
@@ -176,9 +270,8 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
 
   Widget _buildBodyContent(List<TraderProfile> topRatedTraders) {
     final Size size = MediaQuery.of(context).size;
-    return Stack (
-        children: <Widget>[
-          SingleChildScrollView (
+    return SafeArea (
+        child: SingleChildScrollView (
             // child: ResponsiveWrapper (
             //   // defaultScale: true,
             //   maxWidth: 1200,
@@ -218,6 +311,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
                       ),
                       child: Column (
                         // mainAxisSize: MainAxisSize.max,
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: <Widget> [
                           SizedBox(height: 20.0),
                           Container(
@@ -272,11 +366,12 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
               ),
             //),
           ),
-        ]
+        //]
     );
   }
 
   _buildSectionTitle(String title) {
+    final ThemeData theme = Theme.of(context);
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 16.0),
       child: Row(
@@ -284,12 +379,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         children: <Widget>[
           Text(
             '$title',
-            style: TextStyle(
-              color: Color.fromRGBO(0, 0, 0, 1),
-              fontFamily: 'Inter',
-              fontSize: 16.0,
-              fontWeight: FontWeight.bold,
-            ),
+            style: theme.textTheme.subtitle1,
           ),
         ],
       ),
@@ -311,7 +401,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> {
         itemBuilder: (context, index) =>
             Padding(
               padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: ProviderCard(profile: featuredTraders[index]),
+              child: ProviderCard(profile: featuredTraders[index], clientProfile: widget.profile,),
             ),
       ),
     );

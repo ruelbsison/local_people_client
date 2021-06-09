@@ -37,6 +37,7 @@ dependencies:
   # Local people modules
   local_people_core:
     path: ../local_people_core
+  after_layout: ^1.1.0
 
 dev_dependencies:
   flutter_test:
