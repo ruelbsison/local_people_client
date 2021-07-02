@@ -45,19 +45,21 @@ class _MainScreenState extends State<MainScreen> {
           type: BottomNavigationBarType.fixed,
           items: <BottomNavigationBarItem>[
             BottomNavigationBarItem(
-              // icon: Icon(
-              //   MaterialIcons.home,
+              icon: Icon(
+                MaterialIcons.home,
+              ),
+              // icon: SvgPicture.asset(
+              //   'packages/local_people_core/assets/images/schedule-icon.svg',
+              //   fit: BoxFit.contain,
+              //   // height: 24,
+              //   // width: 24,
               // ),
-              icon: SvgPicture.asset(
-                'packages/local_people_core/assets/images/schedule-icon.svg',
-                height: 24,
-                width: 24,
-              ),
-              activeIcon: SvgPicture.asset(
-                  'packages/local_people_core/assets/images/schedule-active-icon.svg',
-                height: 24,
-                width: 24,
-              ),
+              // activeIcon: SvgPicture.asset(
+              //     'packages/local_people_core/assets/images/schedule-active-icon.svg',
+              //   fit: BoxFit.contain,
+              //   // height: 24,
+              //   // width: 24,
+              // ),
               label: LocalPeopleLocalizations.of(context).menuTitleHome,
             ),
             BottomNavigationBarItem(
@@ -66,13 +68,15 @@ class _MainScreenState extends State<MainScreen> {
               // ),
               icon: SvgPicture.asset(
                   'packages/local_people_core/assets/images/your-job-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               activeIcon: SvgPicture.asset(
                 'packages/local_people_core/assets/images/your-job-active-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               label: LocalPeopleLocalizations.of(context).menuTitleYourJobs,
             ),
@@ -82,13 +86,15 @@ class _MainScreenState extends State<MainScreen> {
               // ),
               icon: SvgPicture.asset(
                   'packages/local_people_core/assets/images/search-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               activeIcon: SvgPicture.asset(
                   'packages/local_people_core/assets/images/search-active-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               label: LocalPeopleLocalizations.of(context).menuTitleSearch,
             ),
@@ -98,30 +104,32 @@ class _MainScreenState extends State<MainScreen> {
               // ),
               icon: SvgPicture.asset(
                   'packages/local_people_core/assets/images/messages-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               activeIcon: SvgPicture.asset(
                   'packages/local_people_core/assets/images/messages-active-icon.svg',
-                height: 24,
-                width: 24,
+                fit: BoxFit.contain,
+                // height: 24,
+                // width: 24,
               ),
               label: LocalPeopleLocalizations.of(context).menuTitleMessages,
             ),
             BottomNavigationBarItem(
-              // icon: Icon(
-              //   MaterialIcons.menu,
+              icon: Icon(
+                MaterialIcons.more_horiz,
+              ),
+              // icon: SvgPicture.asset(
+              //     'packages/local_people_core/assets/images/more-icon.svg',
+              //   height: 24,
+              //   width: 24,
               // ),
-              icon: SvgPicture.asset(
-                  'packages/local_people_core/assets/images/more-icon.svg',
-                height: 24,
-                width: 24,
-              ),
-              activeIcon: SvgPicture.asset(
-                  'packages/local_people_core/assets/images/more-active-icon.svg',
-                height: 24,
-                width: 24,
-              ),
+              // activeIcon: SvgPicture.asset(
+              //     'packages/local_people_core/assets/images/more-active-icon.svg',
+              //   height: 24,
+              //   width: 24,
+              // ),
               label: LocalPeopleLocalizations.of(context).menuTitleMore,
             ),
           ],

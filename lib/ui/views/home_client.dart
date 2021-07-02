@@ -17,8 +17,8 @@ class ClientHomeScreen extends StatefulWidget {
   ClientProfile profile;
 }
 
-class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMixin<ClientHomeScreen> {
-
+class _ClientHomeScreenState extends State<ClientHomeScreen>
+    with AfterLayoutMixin<ClientHomeScreen> {
   void printScreenInformation() {
     print('Device width dp:${1.sw}dp');
     print('Device height dp:${1.sh}dp');
@@ -63,7 +63,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
     // Figma Flutter Generator DashboardWidget - FRAME
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
-        appBar: buildAppBar(),
+      appBar: buildAppBar(),
       /* body: ResponsiveWrapper(
         child: _buildBody2(context),
         // child: _buildBodyList(),
@@ -88,19 +88,17 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
   AppBarWidget buildAppBar() {
     final theme = Theme.of(context);
     return AppBarWidget(
-      //appBarPreferredSize: Size.fromHeight(60.0),
-      title: Text(
-        AppLocalizations.of(context).appTitle,
-      ),
-      subTitle: DateFormatUtil.getFormattedDate(),
+      appBarPreferredSize: Size.fromHeight(110.0),
+      title: DateFormatUtil.getFormattedDate(),
+      //subTitle: DateFormatUtil.getFormattedDate(),
       appBar: AppBar(),
-      actions: <Widget> [
-        OutlinedButton (
+      actions: <Widget>[
+        OutlinedButton(
           child: Text(
             LocalPeopleLocalizations.of(context).btnTitlePostJob,
-              style: theme.textTheme.button,
+            style: theme.textTheme.button,
           ),
-          onPressed: ()  {
+          onPressed: () {
             AppRouter.pushPage(context, JobCreateScreen());
           },
         ),
@@ -108,96 +106,98 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
     );
   }
 
-  Widget buildBody() { //BuildContext context) {
+  Widget buildBody() {
+    //BuildContext context) {
     try {
       ClientProfile clientProfile = sl<ClientProfile>();
-      if (clientProfile  == null)
+      if (clientProfile == null)
         context.read<ProfileBloc>().add(ProfileGetEvent());
       else {
         widget.profile = clientProfile;
         context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
       }
-    } catch(e) {
+    } catch (e) {
       context.read<ProfileBloc>().add(ProfileGetEvent());
       print(e.toString());
     }
     return BlocConsumer<ProfileBloc, ProfileState>(
         listenWhen: (previous, current) {
-          // return true/false to determine whether or not
-          // to invoke listener with state
-          print('listenWhen: previous is $previous, current is $current');
+      // return true/false to determine whether or not
+      // to invoke listener with state
+      print('listenWhen: previous is $previous, current is $current');
 
-          if (previous is ProfileCreating &&
-              current is ProfileCreated) {
-            locatorAddClientProfile(current.profile);
-            widget.profile = current.profile;
-            AppRouter.pushPage(context, ProfileScreen(profile: current.profile,));
-            context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-            //return true;
-          } else if (previous is ProfileLoading &&
-              current is ClientProfileLoaded) {
-            locatorAddClientProfile(current.profile);
-            widget.profile = current.profile;
-            context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-            //return true;
-          }
-          return false;
-        },
-        listener: (context, state) {
-          // do stuff here based on BlocA's state
-          print('listener: current is $state');
+      if (previous is ProfileLoading && current is ProfileDoesNotExists) {
+        return true;
+      } else if (previous is ProfileCreating && current is ProfileCreated) {
+        return true;
+      } else if (previous is ProfileLoading && current is ClientProfileLoaded) {
+        return true;
+      }
+      return false;
+    }, listener: (context, state) {
+      // do stuff here based on BlocA's state
+      print('listener: current is $state');
 
-          // if (state is ProfileCreated) {
-          //   widget.profile = state.profile;
-          //   AppRouter.pushPage(context, ProfileScreen(profile: state.profile,));
-          //   context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-          // } else if (state is ClientProfileLoaded) {
-          //   widget.profile = state.profile;
-          //   context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
-          // }
-        },
-        buildWhen: (previous, current) {
-          // return true/false to determine whether or not
-          // to rebuild the widget with state
-          print('buildWhen: previous is $previous, current is $current');
-          if (previous is ProfileInitialState &&
-              current is ProfileLoading) {
-            return true;
-          } else if (previous is ProfileLoading &&
-              current is ProfileNotLoaded) {
-            return true;
-          } else if (previous is ProfileCreating &&
-              current is ProfileCreateFailed) {
-            return true;
-          } else if (previous is ClientProfileGetLoading &&
-              current is ClientProfileGetFailed) {
-            return true;
-          } else if (previous is ProfileTraderTopRatedLoading &&
-              current is ProfileTraderTopRatedFailed) {
-            return true;
-          } else if (previous is ProfileTraderTopRatedLoading &&
-              current is ProfileTraderTopRatedCompleted) {
-            return true;
-          }
-          return false;
-        },
-        builder: (context, state) {
-          // return widget here based on BlocA's state
-          print('builder: current is $state');
-          if (state is ProfileTraderTopRatedFailed
-          || state is ClientProfileGetFailed
-          || state is ProfileCreateFailed
-              || state is ProfileNotLoaded
-              || state is ClientProfileUpdateFailed
-              || state is TraderProfileUpdateFailed
-              || state is TraderProfileGetFailed) {
-            return ErrorWidget('Error: $state');
-          } else if (state is ProfileTraderTopRatedCompleted) {
-            return _buildBodyContent(state.topRatedTraders);
-          }
-          return LoadingWidget();
-        }
-    );
+      if (state is ProfileCreated) {
+        locatorAddClientProfile(state.profile);
+        widget.profile = state.profile;
+        AppRouter.pushPage(
+            context,
+            ProfileScreen(
+              profile: widget.profile,
+            ));
+        context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+      } else if (state is ProfileDoesNotExists) {
+        context.read<ProfileBloc>().add(ProfileCreateEvent());
+      } else if (state is ClientProfileLoaded) {
+        locatorAddClientProfile(state.profile);
+        widget.profile = state.profile;
+        context.read<ProfileBloc>().add(ProfileGetTraderTopRatedEvent());
+      }
+    }, buildWhen: (previous, current) {
+      // return true/false to determine whether or not
+      // to rebuild the widget with state
+      print('buildWhen: previous is $previous, current is $current');
+      if (previous is ProfileInitialState && current is ProfileLoading) {
+        return true;
+      } else if (previous is ProfileLoading && current is ProfileNotLoaded) {
+        return true;
+      } else if (previous is ProfileCreating &&
+          current is ProfileCreateFailed) {
+        return true;
+      } else if (previous is ClientProfileGetLoading &&
+          current is ClientProfileGetFailed) {
+        return true;
+      } else if (previous is ProfileTraderTopRatedLoading &&
+          current is ProfileTraderTopRatedFailed) {
+        return true;
+      } else if (previous is ProfileTraderTopRatedLoading &&
+          current is ProfileTraderTopRatedCompleted) {
+        return true;
+      } else if (previous is ProfileLoading && current is ProfileDoesNotExists) {
+        return false;
+      } else if (previous is ProfileCreating && current is ProfileCreated) {
+        return false;
+      } else if (previous is ProfileLoading && current is ClientProfileLoaded) {
+        return false;
+      }
+      return false;
+    }, builder: (context, state) {
+      // return widget here based on BlocA's state
+      print('builder: current is $state');
+      if (state is ProfileTraderTopRatedFailed ||
+          state is ClientProfileGetFailed ||
+          state is ProfileCreateFailed ||
+          state is ProfileNotLoaded ||
+          state is ClientProfileUpdateFailed ||
+          state is TraderProfileUpdateFailed ||
+          state is TraderProfileGetFailed) {
+        return ErrorWidget('Error: $state');
+      } else if (state is ProfileTraderTopRatedCompleted) {
+        return _buildBodyContent(state.topRatedTraders);
+      }
+      return LoadingWidget();
+    });
     // return BlocBuilder<ProfileBloc, ProfileState>(
     //   builder: (context, state) {
     //     if (state is ProfileDoesNotExists) {
@@ -269,104 +269,116 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
   // }
 
   Widget _buildBodyContent(List<TraderProfile> topRatedTraders) {
+    final media = MediaQuery.of(context);
     final Size size = MediaQuery.of(context).size;
-    return SafeArea (
-        child: SingleChildScrollView (
-            // child: ResponsiveWrapper (
-            //   // defaultScale: true,
-            //   maxWidth: 1200,
-            //   minWidth: 375,
-            //   defaultName: MOBILE,
-            //   breakpoints: [
-            //     /* ResponsiveBreakpoint.resize(375, name: MOBILE),
-            //     ResponsiveBreakpoint.autoScale(800, name: TABLET),
-            //     ResponsiveBreakpoint.autoScale(1000, name: TABLET),
-            //     ResponsiveBreakpoint.resize(1200, name: DESKTOP),
-            //     ResponsiveBreakpoint.autoScale(2460, name: "4K"),*/
-            //     ResponsiveBreakpoint.autoScale(375, name: MOBILE),
-            //     ResponsiveBreakpoint.resize(600, name: MOBILE),
-            //     ResponsiveBreakpoint.resize(850, name: TABLET),
-            //     ResponsiveBreakpoint.resize(1080, name: DESKTOP),
-            //   ],
-              // padding: EdgeInsets.all(20),
-              child: Column (
-                children: <Widget> [
-                  SizedBox(height: 20.0),
-                  _buildSectionTitle('Find Local People'),
-                  // SizedBox(height: 10.0),
-                  //_buildFeaturedSection(),
-                  Padding (
-                    padding: EdgeInsets.all(18),
-                    child: Container(
-                      height: 119,
-                      width: size.width,
-                      decoration: BoxDecoration(
-                        borderRadius : BorderRadius.only(
-                          topLeft: Radius.circular(3),
-                          topRight: Radius.circular(3),
-                          bottomLeft: Radius.circular(3),
-                          bottomRight: Radius.circular(3),
+    final theme = Theme.of(context);
+    return SafeArea(
+      child: SingleChildScrollView(
+        // child: ResponsiveWrapper (
+        //   // defaultScale: true,
+        //   maxWidth: 1200,
+        //   minWidth: 375,
+        //   defaultName: MOBILE,
+        //   breakpoints: [
+        //     /* ResponsiveBreakpoint.resize(375, name: MOBILE),
+        //     ResponsiveBreakpoint.autoScale(800, name: TABLET),
+        //     ResponsiveBreakpoint.autoScale(1000, name: TABLET),
+        //     ResponsiveBreakpoint.resize(1200, name: DESKTOP),
+        //     ResponsiveBreakpoint.autoScale(2460, name: "4K"),*/
+        //     ResponsiveBreakpoint.autoScale(375, name: MOBILE),
+        //     ResponsiveBreakpoint.resize(600, name: MOBILE),
+        //     ResponsiveBreakpoint.resize(850, name: TABLET),
+        //     ResponsiveBreakpoint.resize(1080, name: DESKTOP),
+        //   ],
+        // padding: EdgeInsets.all(20),
+        child: Column(
+          children: <Widget>[
+            SizedBox(height: 20.0),
+            _buildSectionTitle('Find Local People'),
+            // SizedBox(height: 10.0),
+            //_buildFeaturedSection(),
+            Padding(
+              padding: EdgeInsets.all(18),
+              child: Container(
+                height: 119,
+                width: size.width,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(3),
+                    topRight: Radius.circular(3),
+                    bottomLeft: Radius.circular(3),
+                    bottomRight: Radius.circular(3),
+                  ),
+                  color: Color.fromRGBO(196, 196, 196, 1.0),
+                ),
+                child: Column(
+                  // mainAxisSize: MainAxisSize.max,
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: <Widget>[
+                    SizedBox(height: 20.0),
+                    Container(
+                      alignment: Alignment.centerLeft,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: 16),
+                        child: Text(
+                          'Book your next job',
+                          textAlign: TextAlign.left,
+                          style: TextStyle(
+                            color: Color.fromRGBO(0, 0, 0, 1),
+                            fontFamily: 'Inter',
+                            fontSize: 20,
+                            letterSpacing:
+                                0 /*percentages not used in flutter. defaulting to zero*/,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
-                        color : Color.fromRGBO(196, 196, 196, 1.0),
-                      ),
-                      child: Column (
-                        // mainAxisSize: MainAxisSize.max,
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: <Widget> [
-                          SizedBox(height: 20.0),
-                          Container(
-                            alignment: Alignment.centerLeft,
-                            child: Padding (
-                              padding: EdgeInsets.only(left: 16),
-                              child: Text('Book your next job', textAlign: TextAlign.left, style: TextStyle(
-                                color: Color.fromRGBO(0, 0, 0, 1),
-                                fontFamily: 'Inter',
-                                fontSize: 20,
-                                letterSpacing: 0 /*percentages not used in flutter. defaulting to zero*/,
-                                fontWeight: FontWeight.bold,
-                              ),),
-                            ),
-                          ),
-                          SizedBox(height: 40.0),
-                          Container (
-                            alignment: Alignment.center,
-                            child: Text('Search for services now', textAlign: TextAlign.center, style: TextStyle(
-                              color: Color.fromRGBO(0, 0, 0, 1),
-                              fontFamily: 'Inter',
-                              fontSize: 16,
-                              letterSpacing: 0 /*percentages not used in flutter. defaulting to zero*/,
-                              fontWeight: FontWeight.bold,
-                            ),),
-                          ),
-                          // SizedBox(height: 20.0),
-                        ],
                       ),
                     ),
-                  ),
-                  // SizedBox(height: 10.0),
-                  _buildSectionTitle('Your Previous Providers'),
-                  // SizedBox(height: 10.0),
-                  _buildFeaturedSection(topRatedTraders),
-                  // SizedBox(height: 10.0),
-                  _buildSectionTitle('Ready to book now'),
-                  // SizedBox(height: 10.0),
-                  _buildFeaturedSection(topRatedTraders),
-                  // SizedBox(height: 10.0),
-                  _buildSectionTitle('Top Rated in your Area'),
-                  // SizedBox(height: 10.0),
-                  _buildTopRatedSection(topRatedTraders),
-                  // SizedBox(height: 10.0),
-                  _buildSectionTitle('Latest Activity'),
-                  // SizedBox(height: 10.0),
-                  _buildFeaturedSection(topRatedTraders),
-                  // SizedBox(height: 10.0),
-                  _buildSectionTitle('Most Recommended'),
-                  _buildMostRecommendedSection(topRatedTraders),
-                ],
+                    SizedBox(height: 40.0),
+                    Container(
+                      alignment: Alignment.center,
+                      child: Text(
+                        'Search for services now',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          color: Color.fromRGBO(0, 0, 0, 1),
+                          fontFamily: 'Inter',
+                          fontSize: 16,
+                          letterSpacing:
+                              0 /*percentages not used in flutter. defaulting to zero*/,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    // SizedBox(height: 20.0),
+                  ],
+                ),
               ),
-            //),
-          ),
-        //]
+            ),
+            // SizedBox(height: 10.0),
+            _buildSectionTitle('Your Previous Providers'),
+            // SizedBox(height: 10.0),
+            _buildFeaturedSection(topRatedTraders),
+            // SizedBox(height: 10.0),
+            _buildSectionTitle('Ready to book now'),
+            // SizedBox(height: 10.0),
+            _buildFeaturedSection(topRatedTraders),
+            // SizedBox(height: 10.0),
+            _buildSectionTitle('Top Rated in your Area'),
+            // SizedBox(height: 10.0),
+            _buildTopRatedSection(topRatedTraders),
+            // SizedBox(height: 10.0),
+            _buildSectionTitle('Latest Activity'),
+            // SizedBox(height: 10.0),
+            _buildFeaturedSection(topRatedTraders),
+            // SizedBox(height: 10.0),
+            _buildSectionTitle('Most Recommended'),
+            _buildMostRecommendedSection(topRatedTraders),
+          ],
+        ),
+        //),
+      ),
+      //]
     );
   }
 
@@ -398,11 +410,13 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         itemCount: featuredTraders.length,
-        itemBuilder: (context, index) =>
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: ProviderCard(profile: featuredTraders[index], clientProfile: widget.profile,),
-            ),
+        itemBuilder: (context, index) => Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+          child: ProviderCard(
+            profile: featuredTraders[index],
+            clientProfile: widget.profile,
+          ),
+        ),
       ),
     );
   }
@@ -419,11 +433,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         itemCount: topRatedTraders.length,
-        itemBuilder: (context, index) =>
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: ProviderCard(profile: topRatedTraders[index]),
-            ),
+        itemBuilder: (context, index) => Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+          child: ProviderCard(profile: topRatedTraders[index]),
+        ),
       ),
     );
   }
@@ -440,11 +453,10 @@ class _ClientHomeScreenState extends State<ClientHomeScreen> with AfterLayoutMix
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         itemCount: mostRecommendedTraders.length,
-        itemBuilder: (context, index) =>
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
-              child: ProviderCard(profile: mostRecommendedTraders[index]),
-            ),
+        itemBuilder: (context, index) => Padding(
+          padding: EdgeInsets.symmetric(horizontal: 5.0, vertical: 10.0),
+          child: ProviderCard(profile: mostRecommendedTraders[index]),
+        ),
       ),
     );
   }

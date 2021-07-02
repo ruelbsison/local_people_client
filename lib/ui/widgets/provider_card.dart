@@ -23,7 +23,13 @@ class ProviderCard extends StatelessWidget {
     final ThemeData theme = Theme.of(context);
     return InkWell(
         onTap: (){
-          AppRouter.pushPage(context, ProfileScreen(profile: profile, otherProfile: clientProfile,));
+          AppRouter.pushPage(context, DialogManager(
+              child: ProfileScreen(
+                profile: profile,
+                otherProfile: clientProfile,
+              ),
+          ),
+          );
     },
     child: Card(
         elevation: 1,

@@ -14,11 +14,14 @@ import 'package:local_people_core/auth.dart';
 import 'package:local_people_core/profile.dart';
 import 'package:local_people_core/jobs.dart';
 import 'package:local_people_core/messages.dart';
+import 'package:local_people_core/quote.dart';
 import 'ui/views/main_screen.dart';
 import 'ui/router.dart';
 //import 'injection_container.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import'dart:io' show Platform;
+//import 'package:sizer/sizer.dart';
 
 class ClientApp extends StatelessWidget {
   @override
@@ -59,22 +62,40 @@ class ClientApp extends StatelessWidget {
       ),
       ),
     );*/
-    return MaterialApp(
-      title: AppLocalizations().clientAppTitle,
-      theme: AppThemeConfig().kLocalPeopleTraderTheme, //AppThemeConfig().kLocalPeopleClientTheme, //themeData(Theme.of(context), AppThemeConfig.clientTheme),
-      darkTheme: AppThemeConfig().kLocalPeopleClientTheme, //AppThemeConfig().kLocalPeopleTraderTheme, //themeData(Theme.of(context), AppThemeConfig.lightTheme),
-      themeMode: ThemeMode.light,
-      //fontFamily: 'Inter',
-      localizationsDelegates: [
-        LocalPeopleLocalizationsDelegate(),
-        AppLocalizationsDelegate(),
-      ],
-      supportedLocales: [
-        const Locale('en', ''), // English
-      ],
-      debugShowCheckedModeBanner: false,
-      onGenerateRoute: ClientAppRouter.generateRoute,
-      /*home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
+    // return LayoutBuilder(                           //return LayoutBuilder
+    //     builder: (context, constraints) {
+    //       return OrientationBuilder( //return OrientationBuilder
+    //           builder: (context, orientation) {
+    //             //initialize SizerUtil()
+    //             //SizerUtil().init(
+    //             //    constraints, orientation); //initialize SizerUtil
+    //             //final media = MediaQuery.of(context);
+    //             SizerUtil.setScreenSize(constraints, orientation);
+    //             //SizerUtil.width = media.size.width;
+    //             //SizerUtil.height = media.size.height;
+    //             SizerUtil.deviceType = DeviceType.mobile;
+    //             return Sizer(
+    //                 builder: (context, orientation, deviceType)
+    //             {
+                  return DialogManager(
+                      child: MaterialApp(
+                        title: AppLocalizations().clientAppTitle,
+                        theme: AppThemeConfig().kLocalPeopleTraderTheme,
+                        //AppThemeConfig().kLocalPeopleClientTheme, //themeData(Theme.of(context), AppThemeConfig.clientTheme),
+                        darkTheme: AppThemeConfig().kLocalPeopleClientTheme,
+                        //AppThemeConfig().kLocalPeopleTraderTheme, //themeData(Theme.of(context), AppThemeConfig.lightTheme),
+                        themeMode: ThemeMode.light,
+                        //fontFamily: 'Inter',
+                        localizationsDelegates: [
+                          LocalPeopleLocalizationsDelegate(),
+                          AppLocalizationsDelegate(),
+                        ],
+                        supportedLocales: [
+                          const Locale('en', ''), // English
+                        ],
+                        debugShowCheckedModeBanner: false,
+                        onGenerateRoute: ClientAppRouter.generateRoute,
+                        /*home: BlocBuilder<AuthenticationBloc, AuthenticationState>(
         builder: (context, state) {
           if (state is Uninitialized) {
             return LoginScreen();
@@ -84,44 +105,61 @@ class ClientApp extends StatelessWidget {
             return MainScreen();
           }
           return Container(
-            child: Center(child: Text('Unhandle State $state')),
+            child: Center(chbuildDetailsBodyild: Text('Unhandle State $state')),
           );
         },
       ),*/
-     home: ResponsiveWrapper.builder(
-        BlocBuilder<AuthenticationBloc, AuthenticationState>(
-          builder: (context, state) {
-            if (state is Uninitialized) {
-              return LoginScreen();
-            } else if (state is Unauthenticated) {
-              context.read<AuthenticationBloc>().add(AuthenticateUser());
-              return LoginScreen();
-            } else if (state is ReAuthenticate) {
-              context.read<AuthenticationBloc>().add(ReAuthenticateUser());
-              return LoginScreen();
-            } else if (state is Authenticated) {
-              return MainScreen();
-            }
-            return Container(
-              child: Center(child: Text('Unhandle State $state')),
-            );
-          },
-        ),
-        defaultScale: true,
-        maxWidth: 812,
-        minWidth: 375,
-        //maxWidth: 2436,
-        //minWidth: 1125,
-        defaultName: MOBILE,
-        breakpoints: [
-          ResponsiveBreakpoint.autoScale(375, name: MOBILE),
-          ResponsiveBreakpoint.autoScale(600, name: MOBILE),
-          ResponsiveBreakpoint.resize(850, name: TABLET),
-          ResponsiveBreakpoint.resize(1080, name: DESKTOP),
-        ],
-        //mediaQueryData: MediaQueryData(size: Size(375, 812), devicePixelRatio: 3),
-      ),
-    );
+                        home: ResponsiveWrapper.builder(
+                          BlocBuilder<AuthenticationBloc, AuthenticationState>(
+                            builder: (context, state) {
+                              if (state is Uninitialized) {
+                                return LoginScreen();
+                              } else if (state is Unauthenticated) {
+                                context.read<AuthenticationBloc>().add(
+                                    AuthenticateUser());
+                                return LoginScreen();
+                              } else if (state is ReAuthenticate) {
+                                context.read<AuthenticationBloc>().add(
+                                    ReAuthenticateUser());
+                                return LoginScreen();
+                              } else if (state is Authenticated) {
+                                return MainScreen();
+                              } else if (state is AuthenticationError) {
+                                context.read<AuthenticationBloc>().add(
+                                    AuthenticateUser());
+                                return LoginScreen();
+                              }
+                              return Container(
+                                child: Center(
+                                    child: Text('Unhandle State $state')),
+                              );
+                            },
+                          ),
+                          defaultScale: false,
+                          maxWidth: 812,
+                          minWidth: 375,
+                          //maxWidth: 2436,
+                          //minWidth: 1125,
+                          defaultName: MOBILE,
+                          //defaultScaleFactor: 3 / 6.5,
+                          //375x750
+                          //1125x2250
+                          breakpoints: [
+                            ResponsiveBreakpoint.autoScale(375, name: MOBILE),
+                            ResponsiveBreakpoint.autoScale(600, name: MOBILE),
+                            ResponsiveBreakpoint.resize(850, name: TABLET),
+                            ResponsiveBreakpoint.resize(1080, name: DESKTOP),
+                          ],
+                          //mediaQueryData: MediaQueryData(size: Size(375, 812), devicePixelRatio: 3),
+                        ),
+                      )
+                  );
+    //             },);
+    //           }
+    //       );
+    //     }
+    // );
+
   }
 
   // Apply font to our app's theme
@@ -166,7 +204,7 @@ class ClientApp extends StatelessWidget {
     // AuthLocalDataSource authLocalDataSource = AuthLocalDataSourceImpl(
     //   authorizationConfig: AuthorizationConfig.prodClientAuthorizationConfig(),
     // );
-    AuthorizationConfig authorizationConfig;
+    AuthorizationConfig authorizationConfig = AuthorizationConfig.prodClientAuthorizationConfig();
     if (Platform.isIOS == true) {
       authorizationConfig = AuthorizationConfig.prodIOSClientAuthorizationConfig();
     }
@@ -177,6 +215,7 @@ class ClientApp extends StatelessWidget {
     AuthLocalDataSource authLocalDataSource = sl<AuthLocalDataSource>();
     RestClientInterceptor restClientInterceptor = RestClientInterceptor(
       authLocalDataSource: authLocalDataSource,
+      baseURL: RestAPIConfig().baseURL,
     );
 
 
@@ -235,6 +274,46 @@ class ClientApp extends StatelessWidget {
       messageRestApiClient: messageRestApiClient,
     );
 
+    QualificationRestApiClient qualificationRestApiClient = QualificationRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    QualificationRemoteDataSource qualificationRemoteDataSource = QualificationRemoteDataSourceImpl(
+      qualificationRestApiClient: qualificationRestApiClient,
+    );
+
+    PackageRestApiClient packageRestApiClient = PackageRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    PackageRemoteDataSource packageRemoteDataSource = PackageRemoteDataSourceImpl(
+      packageRestApiClient: packageRestApiClient,
+    );
+
+    BookingRestApiClient bookingRestApiClient = BookingRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    BookingRemoteDataSource bookingRemoteDataSource = BookingRemoteDataSourceImpl(
+      bookingRestApiClient: bookingRestApiClient,
+    );
+
+    QuoteRestApiClient quoteRestApiClient = QuoteRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    QuoteRemoteDataSource quoteRemoteDataSource = QuoteRemoteDataSourceImpl(
+      quoteRestApiClient: quoteRestApiClient,
+    );
+
+    QuoteRequestRestApiClient quoteRequestRestApiClient = QuoteRequestRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    QuoteRequestRemoteDataSource quoteRequestRemoteDataSource = QuoteRequestRemoteDataSourceImpl(
+      quoteRequestRestApiClient: quoteRequestRestApiClient,
+    );
+
     final AuthenticationRepository authenticationRepository =
     AuthenticationRepositoryImpl(
       networkInfo: networkInfo,
@@ -267,6 +346,36 @@ class ClientApp extends StatelessWidget {
       messageRemoteDataSource: messageRemoteDataSource,
     );
 
+    final QualificationRepository qualificationRepository = QualificationRepositoryImpl(
+      networkInfo: networkInfo,
+      qualificationRemoteDataSource: qualificationRemoteDataSource,
+    );
+
+    final PackageRepository packageRepository = PackageRepositoryImpl(
+      networkInfo: networkInfo,
+      packageRemoteDataSource: packageRemoteDataSource,
+    );
+
+    final BookingRepository bookingRepository = BookingRepositoryImpl(
+      networkInfo: networkInfo,
+      bookingRemoteDataSource: bookingRemoteDataSource,
+    );
+
+    final QuoteRepository quoteRepository = QuoteRepositoryImpl(
+      networkInfo: networkInfo,
+      quoteRemoteDataSource: quoteRemoteDataSource,
+    );
+
+    final QuoteRequestRepository quoteRequestRepository = QuoteRequestRepositoryImpl(
+      networkInfo: networkInfo,
+      quoteRemoteDataSource: quoteRequestRemoteDataSource,
+    );
+
+    // return MultiProvider(
+    //     providers: [
+    //     ChangeNotifierProvider(create: (context) => JobProvider())
+    //   ],
+    // child: MultiRepositoryProvider(
     return MultiRepositoryProvider(
       providers: [
         RepositoryProvider<AuthenticationRepository>(
@@ -287,6 +396,21 @@ class ClientApp extends StatelessWidget {
         RepositoryProvider<MessageRepository>(
           create: (context) => messageRepository,
         ),
+        RepositoryProvider<QualificationRepository>(
+          create: (context) => qualificationRepository,
+        ),
+        RepositoryProvider<PackageRepository>(
+          create: (context) => packageRepository,
+        ),
+        RepositoryProvider<BookingRepository>(
+          create: (context) => bookingRepository,
+        ),
+        RepositoryProvider<QuoteRepository>(
+          create: (context) => quoteRepository,
+        ),
+        RepositoryProvider<QuoteRequestRepository>(
+          create: (context) => quoteRequestRepository,
+        ),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -303,8 +427,10 @@ class ClientApp extends StatelessWidget {
           BlocProvider(
             create: (context) => ProfileBloc(
                 profileRepository: profileRepository,
+                qualificationRepository: qualificationRepository,
                 appType: appType,
                 authLocalDataSource: authLocalDataSource,
+              packageRepository: packageRepository,
             ),
           ),
           BlocProvider(
@@ -319,18 +445,22 @@ class ClientApp extends StatelessWidget {
           ),
           BlocProvider(
             create: (context) => JobBloc(
-                jobRepository: jobRepository,
-                tagRepository: tagRepository,
-                locationRepository: locationRepository,
-                appType: appType,
-                authLocalDataSource: authLocalDataSource,
+              jobRepository: jobRepository,
+              tagRepository: tagRepository,
+              locationRepository: locationRepository,
+              quoteRepository: quoteRepository,
+              quoteRequestRepository: quoteRequestRepository,
+              //packageRepository: packageRepository,
+              appType: appType,
+              authLocalDataSource: authLocalDataSource,
+              bookingRepository: bookingRepository,
             ),
           ),
           BlocProvider(
             create: (context) => JobFormBloc(
                 jobRepository: jobRepository,
                 tagRepository: tagRepository,
-              locationRepository: locationRepository
+              locationRepository: locationRepository,
             ),
           ),
           BlocProvider(
@@ -347,6 +477,35 @@ class ClientApp extends StatelessWidget {
               authLocalDataSource: authLocalDataSource,
             ),
           ),
+          BlocProvider(
+            create: (context) => QualificationBloc(
+              qualificationRepository: qualificationRepository,
+              authLocalDataSource: authLocalDataSource,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => PackageBloc(
+              packageRepository: packageRepository,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => BookingBloc(
+              bookingRepository: bookingRepository,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => QuoteBloc(
+              quoteRepository: quoteRepository,
+              //profileRepository: profileRepository,
+              //jobRepository: jobRepository,
+              authLocalDataSource: authLocalDataSource,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => QuoteRequestBloc(
+              quoteRequestRepository: quoteRequestRepository,
+            ),
+          ),
         ],
         child: ClientApp(),
         // child: MultiProvider(
@@ -356,6 +515,7 @@ class ClientApp extends StatelessWidget {
         //   child: ClientApp(),
         // ),
       ),
+    //),
     );
   }
 }
