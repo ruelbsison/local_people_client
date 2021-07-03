@@ -314,6 +314,14 @@ class ClientApp extends StatelessWidget {
       quoteRequestRestApiClient: quoteRequestRestApiClient,
     );
 
+    ChangeRequestRestApiClient changeRequestRestApiClient = ChangeRequestRestApiClient(
+      restClientInterceptor.dio,
+      baseUrl: RestAPIConfig().baseURL,
+    );
+    ChangeRequestRemoteDataSource changeRequestRemoteDataSource = ChangeRequestRemoteDataSourceImpl(
+        changeRequestRestApiClient: changeRequestRestApiClient
+    );
+
     final AuthenticationRepository authenticationRepository =
     AuthenticationRepositoryImpl(
       networkInfo: networkInfo,
@@ -371,6 +379,11 @@ class ClientApp extends StatelessWidget {
       quoteRemoteDataSource: quoteRequestRemoteDataSource,
     );
 
+    final ChangeRequestRepository changeRequestRepository = ChangeRequestRepositoryImpl(
+        networkInfo: networkInfo,
+        changeRequestRemoteDataSource: changeRequestRemoteDataSource
+    );
+
     // return MultiProvider(
     //     providers: [
     //     ChangeNotifierProvider(create: (context) => JobProvider())
@@ -410,6 +423,9 @@ class ClientApp extends StatelessWidget {
         ),
         RepositoryProvider<QuoteRequestRepository>(
           create: (context) => quoteRequestRepository,
+        ),
+        RepositoryProvider<ChangeRequestRepository>(
+          create: (context) => changeRequestRepository,
         ),
       ],
       child: MultiBlocProvider(
@@ -454,6 +470,7 @@ class ClientApp extends StatelessWidget {
               appType: appType,
               authLocalDataSource: authLocalDataSource,
               bookingRepository: bookingRepository,
+              changeRequestRepository: changeRequestRepository,
             ),
           ),
           BlocProvider(
@@ -504,6 +521,11 @@ class ClientApp extends StatelessWidget {
           BlocProvider(
             create: (context) => QuoteRequestBloc(
               quoteRequestRepository: quoteRequestRepository,
+            ),
+          ),
+          BlocProvider(
+            create: (context) => ChangeRequestBloc(
+              changeRequestRepository: changeRequestRepository,
             ),
           ),
         ],
