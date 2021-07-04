@@ -88,7 +88,7 @@ class _ClientHomeScreenState extends State<ClientHomeScreen>
   AppBarWidget buildAppBar() {
     final theme = Theme.of(context);
     return AppBarWidget(
-      appBarPreferredSize: Size.fromHeight(110.0),
+      appBarPreferredSize: Size.fromHeight(120.0),
       title: DateFormatUtil.getFormattedDate(),
       //subTitle: DateFormatUtil.getFormattedDate(),
       appBar: AppBar(),
